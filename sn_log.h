@@ -28,6 +28,10 @@ void sn_filelog_fatal(sn_string message_);
 #include<mutex>
 #include<chrono>
 #include<iomanip>           //put_time
+#include<vector>
+#include<sstream>
+#include<string_view>
+
 
 #ifdef WIN32
 #include<Windows.h>
@@ -54,8 +58,51 @@ std::fstream file_;
 const sn_string LOG_FILE_PATH = "sn_log.txt";
 bool log_file_init_ = false;
 
-//程序开始时间
-std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
+
+template<typename T>
+void GetString(std::vector<std::string>& str_vec, T&& t){
+    std::ostringstream oss;
+    oss << t;
+    str_vec.push_back(oss.str());
+}
+
+template<typename T, typename... Args>
+void GetString(std::vector<std::string>& str_vec, T&& t, Args&&... args){
+    std::ostringstream oss;
+    oss << t;
+    str_vec.push_back(oss.str());
+    GetString(str_vec, args...);
+}
+
+//format string
+template<typename... Args>
+std::string sn_format(std::string_view fmt, Args&&... args){
+    size_t args_index = 0;
+
+    std::vector<std::string> str_vec;
+    GetString(str_vec, args...);
+
+    std::ostringstream oss;
+    for(auto it = fmt.begin(); it != fmt.end(); ++it){
+        if(*it == '{'){
+            if(*(it+1) == '}'){
+                if(args_index >= str_vec.size()){
+                    printf("Error: Not enough arguments for format string\n");
+                    exit(1);
+                }
+                oss << str_vec[args_index];
+                ++args_index;
+                ++it;
+            }
+        } else{
+            oss << *it;
+        }
+    }
+    return oss.str();
+} 
+
+
+
 
 enum LogLevel{
     SN_NONE,
@@ -70,6 +117,9 @@ enum LogMode{
     SN_CONSOLE,
     SN_FILE
 };
+
+//程序开始时间
+std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
 
 sn_string log_level_to_string(LogLevel level_);
 void ConsoleColor_win(LogLevel level_);
@@ -230,49 +280,94 @@ void sn_log(sn_string message_, LogLevel level_, LogMode mode_){
 }
 
 
+//console log function
+template<typename... Args>
+void sn_consolelog_debug(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_DEBUG, SN_CONSOLE);
+}
+
 void sn_consolelog_debug(sn_string message_){
     sn_log(message_, SN_DEBUG, SN_CONSOLE);
+}
+
+template<typename... Args>
+void sn_consolelog_info(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_INFO, SN_CONSOLE);
 }
 
 void sn_consolelog_info(sn_string message_){
     sn_log(message_, SN_INFO, SN_CONSOLE);
 }
 
+template<typename... Args>
+void sn_consolelog_warning(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_WARNING, SN_CONSOLE);
+
+}
+
 void sn_consolelog_warning(sn_string message_){
     sn_log(message_, SN_WARNING, SN_CONSOLE);
+}
+
+template<typename... Args>
+void sn_consolelog_error(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_ERROR, SN_CONSOLE);
 }
 
 void sn_consolelog_error(sn_string message_){
     sn_log(message_, SN_ERROR, SN_CONSOLE);
 }
 
+template<typename... Args>
+void sn_consolelog_fatal(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_FATAL, SN_CONSOLE);
+}
+
 void sn_consolelog_fatal(sn_string message_){
     sn_log(message_, SN_FATAL, SN_CONSOLE);
 }
 
-
-
-
-
+//file log function
+template<typename... Args>
+void sn_filelog_debug(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_DEBUG, SN_FILE);
+}
 
 void sn_filelog_debug(sn_string message_){
     sn_log(message_, SN_DEBUG, SN_FILE);
+}
+
+template<typename... Args>
+void sn_filelog_info(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_INFO, SN_FILE);
 }
 
 void sn_filelog_info(sn_string message_){
     sn_log(message_, SN_INFO, SN_FILE);
 }
 
+template<typename... Args>
+void sn_filelog_warning(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_WARNING, SN_FILE);
+}
 
 void sn_filelog_warning(sn_string message_){
     sn_log(message_, SN_WARNING, SN_FILE);
 }
 
+template<typename... Args>
+void sn_filelog_error(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_ERROR, SN_FILE);
+}
 
 void sn_filelog_error(sn_string message_){
     sn_log(message_, SN_ERROR, SN_FILE);
 }
 
+template<typename... Args>
+void sn_filelog_fatal(sn_string message_, Args&&... args_){
+    sn_log(sn_format(message_, args_...), SN_FATAL, SN_FILE);
+}
 
 void sn_filelog_fatal(sn_string message_){
     sn_log(message_, SN_FATAL, SN_FILE);

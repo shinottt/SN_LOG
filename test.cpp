@@ -5,21 +5,23 @@
 
 int main(){
 
-    for(int i=0;i<10000;i++){
-        sn_consolelog_debug("debug message");
-        sn_consolelog_info("info message");
-        sn_consolelog_warning("warning message");
-        sn_consolelog_error("error message");
-        sn_consolelog_fatal("fatal message");
+    for(int i = 0; i < 10000; ++i){
+        sn_consolelog_debug("Debug message: {} {}", i+1, "debug");
+        sn_filelog_debug("Debug message: {} {}", i+1, "debug");
+        sn_consolelog_info("Info message: {} {}", i+1, "info");
+        sn_filelog_info("Info message: {} {}", i+1, "info");
+        sn_consolelog_warning("Warn message: {} {}", i+1, "warning");
+        sn_filelog_warning("Warn message: {} {}", i+1, "warning");
+        sn_consolelog_error("Error message: {} {}", i+1, "error");
+        sn_filelog_error("Error message: {} {}", i+1, "error");
+        sn_consolelog_fatal("Fatal message: {} {}", i+1, "fatal");
+        sn_filelog_fatal("Fatal message: {} {}", i+1, "fatal");
     }
 
-    for(int i=0;i<10000;i++){
-        sn_filelog_debug("debug message");
-        sn_filelog_info("info message");
-        sn_filelog_warning("warning message");
-        sn_filelog_error("error message");
-        sn_filelog_fatal("fatal message");
-    }
+    sn_consolelog_debug("Console log test completed.");
+    sn_filelog_debug("File log test completed.");
+
+    std::cout<<sn_format("{} {} and {} {} tests completed.",10000, "console logs", 10000, "file logs")<<std::endl;
 
     return 0;
 }
