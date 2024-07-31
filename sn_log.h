@@ -40,10 +40,11 @@ void sn_filelog_fatal(sn_string message_);
 #include<pthread.h>
 #endif
 
+
 using sn_string = std::string;
 
-std::mutex mtx_file_;
-std::mutex mtx_console_;
+static std::mutex mtx_file_;
+static std::mutex mtx_console_;
 
 // command line text color
 const std::string cmd_color_reset ="\033[0m";
@@ -54,9 +55,9 @@ const std::string cmd_color_red ="\033[31m";
 const std::string cmd_color_purple = "\033[35m";
 
 // define log file name
-std::fstream file_;
+static std::fstream file_;
+static bool log_file_init_ = false;
 const sn_string LOG_FILE_PATH = "sn_log.txt";
-bool log_file_init_ = false;
 
 
 template<typename T>
@@ -103,7 +104,6 @@ std::string sn_format(std::string_view fmt, Args&&... args){
 
 
 
-
 enum LogLevel{
     SN_NONE,
     SN_DEBUG,
@@ -119,27 +119,68 @@ enum LogMode{
 };
 
 //程序开始时间
-std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
+static std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
 
-sn_string log_level_to_string(LogLevel level_);
-void ConsoleColor_win(LogLevel level_);
-sn_string ConsoleColor(LogLevel level_);
-void sn_log(sn_string message_, LogLevel level_, LogMode mode_);
+static sn_string log_level_to_string(LogLevel level_);
+static void ConsoleColor_win(LogLevel level_);
+static sn_string ConsoleColor(LogLevel level_);
+static void sn_log(sn_string message_, LogLevel level_, LogMode mode_);
 
-void sn_consolelog_debug(sn_string message_);
-void sn_consolelog_info(sn_string message_);
-void sn_consolelog_warning(sn_string message_);
-void sn_consolelog_error(sn_string message_);
-void sn_consolelog_fatal(sn_string message_);
+static void sn_consolelog_debug(sn_string message_);
+static void sn_consolelog_info(sn_string message_);
+static void sn_consolelog_warning(sn_string message_);
+static void sn_consolelog_error(sn_string message_);
+static void sn_consolelog_fatal(sn_string message_);
 
-void sn_filelog_debug(sn_string message_);
-void sn_filelog_info(sn_string message_);
-void sn_filelog_warning(sn_string message_);
-void sn_filelog_error(sn_string message_);
-void sn_filelog_fatal(sn_string message_);
+static void sn_filelog_debug(sn_string message_);
+static void sn_filelog_info(sn_string message_);
+static void sn_filelog_warning(sn_string message_);
+static void sn_filelog_error(sn_string message_);
+static void sn_filelog_fatal(sn_string message_);
 
 
-sn_string log_level_to_string(LogLevel level_){
+
+
+/*
+windows下使用函数控制终端输出颜色，示例：
+    ConsoleColor_win(level_);           //设置颜色
+    std::cout<<"This is a colorful message"<<std::endl;
+    ConsoleColor_win(SN_NONE);          //恢复默认颜色
+*/
+
+#ifdef WIN32
+static void ConsoleColor_win(LogLevel level_){
+        HANDLE hConsole_ = GetStdHandle(STD_OUTPUT_HANDLE);
+        switch (level_){
+            case SN_DEBUG:
+                SetConsoleTextAttribute(hConsole_, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                break;
+            case SN_INFO:
+                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                break;
+            case SN_WARNING:
+                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                break;
+            case SN_ERROR:
+                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_INTENSITY);
+                break;
+            case SN_FATAL:
+                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+                break;
+            case SN_NONE:
+                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                break;
+            default:
+                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                break;
+        }
+}
+#endif  // WIN32 ConsoleColor
+
+
+
+
+static sn_string log_level_to_string(LogLevel level_){
     sn_string level_str_;
     switch(level_){
         case SN_DEBUG:
@@ -168,43 +209,7 @@ sn_string log_level_to_string(LogLevel level_){
 }
 
 
-/*
-windows下使用函数控制终端输出颜色，示例：
-    ConsoleColor_win(level_);           //设置颜色
-    std::cout<<"This is a colorful message"<<std::endl;
-    ConsoleColor_win(SN_NONE);          //恢复默认颜色
-*/
-#ifdef WIN32
-void ConsoleColor_win(LogLevel level_){
-        HANDLE hConsole_ = GetStdHandle(STD_OUTPUT_HANDLE);
-        switch (level_){
-            case SN_DEBUG:
-                SetConsoleTextAttribute(hConsole_, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                break;
-            case SN_INFO:
-                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                break;
-            case SN_WARNING:
-                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                break;
-            case SN_ERROR:
-                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_INTENSITY);
-                break;
-            case SN_FATAL:
-                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-                break;
-            case SN_NONE:
-                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-                break;
-            default:
-                SetConsoleTextAttribute(hConsole_, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-                break;
-        }
-}
-#endif  // WIN32 ConsoleColor
-
-//终端的ANSI转义序列
-sn_string ConsoleColor(LogLevel level_){
+static sn_string ConsoleColor(LogLevel level_){
     switch(level_){
         case SN_DEBUG:
             return cmd_color_cyan;
@@ -231,7 +236,8 @@ sn_string ConsoleColor(LogLevel level_){
 }
 
 
-void sn_log(sn_string message_, LogLevel level_, LogMode mode_){
+
+static void sn_log(sn_string message_, LogLevel level_, LogMode mode_){
     //毫秒计时
     std::chrono::steady_clock::time_point end_time_ = std::chrono::steady_clock::now();
     std::chrono::duration<double, std::milli> run_time_ms_ = end_time_ - start_time_;
@@ -280,13 +286,14 @@ void sn_log(sn_string message_, LogLevel level_, LogMode mode_){
 }
 
 
+
 //console log function
 template<typename... Args>
 void sn_consolelog_debug(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_DEBUG, SN_CONSOLE);
 }
 
-void sn_consolelog_debug(sn_string message_){
+static void sn_consolelog_debug(sn_string message_){
     sn_log(message_, SN_DEBUG, SN_CONSOLE);
 }
 
@@ -295,7 +302,7 @@ void sn_consolelog_info(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_INFO, SN_CONSOLE);
 }
 
-void sn_consolelog_info(sn_string message_){
+static void sn_consolelog_info(sn_string message_){
     sn_log(message_, SN_INFO, SN_CONSOLE);
 }
 
@@ -305,7 +312,7 @@ void sn_consolelog_warning(sn_string message_, Args&&... args_){
 
 }
 
-void sn_consolelog_warning(sn_string message_){
+static void sn_consolelog_warning(sn_string message_){
     sn_log(message_, SN_WARNING, SN_CONSOLE);
 }
 
@@ -314,7 +321,7 @@ void sn_consolelog_error(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_ERROR, SN_CONSOLE);
 }
 
-void sn_consolelog_error(sn_string message_){
+static void sn_consolelog_error(sn_string message_){
     sn_log(message_, SN_ERROR, SN_CONSOLE);
 }
 
@@ -323,7 +330,7 @@ void sn_consolelog_fatal(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_FATAL, SN_CONSOLE);
 }
 
-void sn_consolelog_fatal(sn_string message_){
+static void sn_consolelog_fatal(sn_string message_){
     sn_log(message_, SN_FATAL, SN_CONSOLE);
 }
 
@@ -333,7 +340,7 @@ void sn_filelog_debug(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_DEBUG, SN_FILE);
 }
 
-void sn_filelog_debug(sn_string message_){
+static void sn_filelog_debug(sn_string message_){
     sn_log(message_, SN_DEBUG, SN_FILE);
 }
 
@@ -342,7 +349,7 @@ void sn_filelog_info(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_INFO, SN_FILE);
 }
 
-void sn_filelog_info(sn_string message_){
+static void sn_filelog_info(sn_string message_){
     sn_log(message_, SN_INFO, SN_FILE);
 }
 
@@ -351,7 +358,7 @@ void sn_filelog_warning(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_WARNING, SN_FILE);
 }
 
-void sn_filelog_warning(sn_string message_){
+static void sn_filelog_warning(sn_string message_){
     sn_log(message_, SN_WARNING, SN_FILE);
 }
 
@@ -360,7 +367,7 @@ void sn_filelog_error(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_ERROR, SN_FILE);
 }
 
-void sn_filelog_error(sn_string message_){
+static void sn_filelog_error(sn_string message_){
     sn_log(message_, SN_ERROR, SN_FILE);
 }
 
@@ -369,7 +376,7 @@ void sn_filelog_fatal(sn_string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_FATAL, SN_FILE);
 }
 
-void sn_filelog_fatal(sn_string message_){
+static void sn_filelog_fatal(sn_string message_){
     sn_log(message_, SN_FATAL, SN_FILE);
 }
 
