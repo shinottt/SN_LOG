@@ -1,25 +1,5 @@
-#ifndef _SN_LOG_HEADER_
-#define _SN_LOG_HEADER_
-
-/*
-
-// command line print function
-void sn_consolelog_debug(sn_string message_);
-void sn_consolelog_info(sn_string message_);
-void sn_consolelog_warning(sn_string message_);
-void sn_consolelog_error(sn_string message_);
-void sn_consolelog_fatal(sn_string message_);
-
-// file log function
-void sn_filelog_debug(sn_string message_);
-void sn_filelog_info(sn_string message_);
-void sn_filelog_warning(sn_string message_);
-void sn_filelog_error(sn_string message_);
-void sn_filelog_fatal(sn_string message_);
-
-*/
-
-
+#ifndef _SN_LOG_HEADER11_
+#define _SN_LOG_HEADER11_
 
 
 #include<iostream>
@@ -76,7 +56,7 @@ void GetString(std::vector<std::string>& str_vec, T&& t, Args&&... args){
 }
 
 //format string
-template<typename... Args>
+template<typename T = std::string_view, typename... Args>
 std::string sn_format(std::string_view fmt, Args&&... args){
     size_t args_index = 0;
 
@@ -120,26 +100,6 @@ enum LogMode{
 
 //程序开始时间
 static std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
-
-static sn_string log_level_to_string(LogLevel level_);
-static void ConsoleColor_win(LogLevel level_);
-static sn_string ConsoleColor(LogLevel level_);
-static void sn_log(sn_string message_, LogLevel level_, LogMode mode_);
-
-static void sn_consolelog_debug(sn_string message_);
-static void sn_consolelog_info(sn_string message_);
-static void sn_consolelog_warning(sn_string message_);
-static void sn_consolelog_error(sn_string message_);
-static void sn_consolelog_fatal(sn_string message_);
-
-static void sn_filelog_debug(sn_string message_);
-static void sn_filelog_info(sn_string message_);
-static void sn_filelog_warning(sn_string message_);
-static void sn_filelog_error(sn_string message_);
-static void sn_filelog_fatal(sn_string message_);
-
-
-
 
 /*
 windows下使用函数控制终端输出颜色，示例：
@@ -381,4 +341,18 @@ static void sn_filelog_fatal(sn_string message_){
 }
 
 
-#endif  // _SN_LOG_HEADER_
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif  // _SN_LOG_HEADER11_

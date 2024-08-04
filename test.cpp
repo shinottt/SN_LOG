@@ -1,11 +1,12 @@
 
-
+#include"a.h"
+#include"b.h"
 #include"sn_log.h"
 
 
 int main(){
 
-    for(int i = 0; i < 10000; ++i){
+    for(int i = 0; i < 1; ++i){
         sn_consolelog_debug("Debug message: {} {}", i+1, "debug");
         sn_filelog_debug("Debug message: {} {}", i+1, "debug");
         sn_consolelog_info("Info message: {} {}", i+1, "info");
@@ -21,7 +22,7 @@ int main(){
     sn_consolelog_debug("Console log test completed.");
     sn_filelog_debug("File log test completed.");
 
-    std::cout<<sn_format("{} {} and {} {} tests completed.",10000, "console logs", 10000, "file logs")<<std::endl;
+    std::cout<<sn_format("{} {} and {} {} tests completed.", 1, "console logs", 1, "file logs")<<std::endl;
 
     return 0;
 }
