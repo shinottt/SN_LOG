@@ -1,6 +1,6 @@
 # C++练习 日志输出 很慢
 
-VSCode + MinGW64<br>
+## MinGW64<br>
 ubuntu22虚拟机下的运行时间大概是window下的十分之一
 
 compile command:
@@ -11,10 +11,11 @@ mingw32-make
 ```C++
 #include"sn_log.h"
 
-
 int main(){
 
-    for(int i = 0; i < 10000; ++i){
+    int log_num = 10000;
+
+    for(int i = 0; i < log_num; ++i){
         sn_consolelog_debug("Debug message: {} {}", i+1, "debug");
         sn_filelog_debug("Debug message: {} {}", i+1, "debug");
         sn_consolelog_info("Info message: {} {}", i+1, "info");
@@ -30,7 +31,7 @@ int main(){
     sn_consolelog_debug("Console log test completed.");
     sn_filelog_debug("File log test completed.");
 
-    std::cout<<sn_format("{} {} and {} {} tests completed.",10000, "console logs", 10000, "file logs")<<std::endl;
+    std::cout<<sn_format("{} {} and {} {} tests completed.", log_num, "console logs", log_num, "file logs")<<std::endl;
 
     return 0;
 }

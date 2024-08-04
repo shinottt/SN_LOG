@@ -21,8 +21,6 @@
 #endif
 
 
-using sn_string = std::string;
-
 static std::mutex mtx_file_;
 static std::mutex mtx_console_;
 
@@ -37,18 +35,18 @@ const std::string cmd_color_purple = "\033[35m";
 // define log file name
 static std::fstream file_;
 static bool log_file_init_ = false;
-const sn_string LOG_FILE_PATH = "sn_log.txt";
+const std::string LOG_FILE_PATH = "sn_log.txt";
 
 
 template<typename T>
-void GetString(std::vector<std::string>& str_vec, T&& t){
+void GetString(std::vector<std::string_view>& str_vec, T&& t){
     std::ostringstream oss;
     oss << t;
     str_vec.push_back(oss.str());
 }
 
 template<typename T, typename... Args>
-void GetString(std::vector<std::string>& str_vec, T&& t, Args&&... args){
+void GetString(std::vector<std::string_view>& str_vec, T&& t, Args&&... args){
     std::ostringstream oss;
     oss << t;
     str_vec.push_back(oss.str());
@@ -60,7 +58,7 @@ template<typename T = std::string_view, typename... Args>
 std::string sn_format(std::string_view fmt, Args&&... args){
     size_t args_index = 0;
 
-    std::vector<std::string> str_vec;
+    std::vector<std::string_view> str_vec;
     GetString(str_vec, args...);
 
     std::ostringstream oss;
@@ -98,16 +96,13 @@ enum LogMode{
     SN_FILE
 };
 
-//程序开始时间
-static std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
-
 /*
 windows下使用函数控制终端输出颜色，示例：
     ConsoleColor_win(level_);           //设置颜色
     std::cout<<"This is a colorful message"<<std::endl;
     ConsoleColor_win(SN_NONE);          //恢复默认颜色
 */
-
+/*
 #ifdef WIN32
 static void ConsoleColor_win(LogLevel level_){
         HANDLE hConsole_ = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -136,12 +131,12 @@ static void ConsoleColor_win(LogLevel level_){
         }
 }
 #endif  // WIN32 ConsoleColor
+*/
 
 
 
-
-static sn_string log_level_to_string(LogLevel level_){
-    sn_string level_str_;
+static std::string log_level_to_string(LogLevel level_){
+    std::string level_str_;
     switch(level_){
         case SN_DEBUG:
             level_str_ = "DEBUG";
@@ -169,7 +164,7 @@ static sn_string log_level_to_string(LogLevel level_){
 }
 
 
-static sn_string ConsoleColor(LogLevel level_){
+static std::string ConsoleColor(LogLevel level_){
     switch(level_){
         case SN_DEBUG:
             return cmd_color_cyan;
@@ -196,8 +191,10 @@ static sn_string ConsoleColor(LogLevel level_){
 }
 
 
+//程序开始时间
+static std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
 
-static void sn_log(sn_string message_, LogLevel level_, LogMode mode_){
+static void sn_log(std::string message_, LogLevel level_, LogMode mode_){
     //毫秒计时
     std::chrono::steady_clock::time_point end_time_ = std::chrono::steady_clock::now();
     std::chrono::duration<double, std::milli> run_time_ms_ = end_time_ - start_time_;
@@ -248,98 +245,99 @@ static void sn_log(sn_string message_, LogLevel level_, LogMode mode_){
 
 
 //console log function
-template<typename... Args>
-void sn_consolelog_debug(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_consolelog_debug(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_DEBUG, SN_CONSOLE);
 }
-
-static void sn_consolelog_debug(sn_string message_){
+template<typename T = std::string>
+void sn_consolelog_debug(std::string message_){
     sn_log(message_, SN_DEBUG, SN_CONSOLE);
 }
 
-template<typename... Args>
-void sn_consolelog_info(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_consolelog_info(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_INFO, SN_CONSOLE);
 }
-
-static void sn_consolelog_info(sn_string message_){
+template<typename T = std::string>
+void sn_consolelog_info(std::string message_){
     sn_log(message_, SN_INFO, SN_CONSOLE);
 }
 
-template<typename... Args>
-void sn_consolelog_warning(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_consolelog_warning(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_WARNING, SN_CONSOLE);
 
 }
-
-static void sn_consolelog_warning(sn_string message_){
+template<typename T = std::string>
+void sn_consolelog_warning(std::string message_){
     sn_log(message_, SN_WARNING, SN_CONSOLE);
 }
 
-template<typename... Args>
-void sn_consolelog_error(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_consolelog_error(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_ERROR, SN_CONSOLE);
 }
-
-static void sn_consolelog_error(sn_string message_){
+template<typename T = std::string>
+void sn_consolelog_error(std::string message_){
     sn_log(message_, SN_ERROR, SN_CONSOLE);
 }
 
-template<typename... Args>
-void sn_consolelog_fatal(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_consolelog_fatal(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_FATAL, SN_CONSOLE);
 }
-
-static void sn_consolelog_fatal(sn_string message_){
+template<typename T = std::string>
+void sn_consolelog_fatal(std::string message_){
     sn_log(message_, SN_FATAL, SN_CONSOLE);
 }
 
+
 //file log function
-template<typename... Args>
-void sn_filelog_debug(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_filelog_debug(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_DEBUG, SN_FILE);
 }
-
-static void sn_filelog_debug(sn_string message_){
+template<typename T = std::string>
+void sn_filelog_debug(std::string message_){
     sn_log(message_, SN_DEBUG, SN_FILE);
 }
 
-template<typename... Args>
-void sn_filelog_info(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_filelog_info(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_INFO, SN_FILE);
 }
 
-static void sn_filelog_info(sn_string message_){
+template<typename T = std::string>
+void sn_filelog_info(std::string message_){
     sn_log(message_, SN_INFO, SN_FILE);
 }
 
-template<typename... Args>
-void sn_filelog_warning(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_filelog_warning(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_WARNING, SN_FILE);
 }
-
-static void sn_filelog_warning(sn_string message_){
+template<typename T = std::string>
+void sn_filelog_warning(std::string message_){
     sn_log(message_, SN_WARNING, SN_FILE);
 }
 
-template<typename... Args>
-void sn_filelog_error(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_filelog_error(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_ERROR, SN_FILE);
 }
-
-static void sn_filelog_error(sn_string message_){
+template<typename T = std::string>
+void sn_filelog_error(std::string message_){
     sn_log(message_, SN_ERROR, SN_FILE);
 }
 
-template<typename... Args>
-void sn_filelog_fatal(sn_string message_, Args&&... args_){
+template<typename T = std::string, typename... Args>
+void sn_filelog_fatal(std::string message_, Args&&... args_){
     sn_log(sn_format(message_, args_...), SN_FATAL, SN_FILE);
 }
-
-static void sn_filelog_fatal(sn_string message_){
+template<typename T = std::string>
+void sn_filelog_fatal(std::string message_){
     sn_log(message_, SN_FATAL, SN_FILE);
 }
-
 
 
 
