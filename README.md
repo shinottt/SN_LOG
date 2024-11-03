@@ -1,7 +1,6 @@
-# C++练习 日志输出 很慢
+# C++ practice log library
 
 ## MinGW64<br>
-ubuntu22虚拟机下的运行时间大概是window下的十分之一
 
 compile command:
 ```cmd

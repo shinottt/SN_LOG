@@ -1,5 +1,5 @@
-#ifndef _SN_LOG_HEADER11_
-#define _SN_LOG_HEADER11_
+#ifndef _SN_LOG_HEADER_
+#define _SN_LOG_HEADER_
 
 
 #include<iostream>
@@ -10,7 +10,6 @@
 #include<iomanip>           //put_time
 #include<vector>
 #include<sstream>
-#include<string_view>
 
 
 #ifdef WIN32
@@ -39,14 +38,14 @@ const std::string LOG_FILE_PATH = "sn_log.txt";
 
 
 template<typename T>
-void GetString(std::vector<std::string_view>& str_vec, T&& t){
+void GetString(std::vector<std::string>& str_vec, T&& t){
     std::ostringstream oss;
     oss << t;
     str_vec.push_back(oss.str());
 }
 
 template<typename T, typename... Args>
-void GetString(std::vector<std::string_view>& str_vec, T&& t, Args&&... args){
+void GetString(std::vector<std::string>& str_vec, T&& t, Args&&... args){
     std::ostringstream oss;
     oss << t;
     str_vec.push_back(oss.str());
@@ -54,11 +53,11 @@ void GetString(std::vector<std::string_view>& str_vec, T&& t, Args&&... args){
 }
 
 //format string
-template<typename T = std::string_view, typename... Args>
-std::string sn_format(std::string_view fmt, Args&&... args){
+template<typename T = std::string, typename... Args>
+std::string sn_format(std::string fmt, Args&&... args){
     size_t args_index = 0;
 
-    std::vector<std::string_view> str_vec;
+    std::vector<std::string> str_vec;
     GetString(str_vec, args...);
 
     std::ostringstream oss;
