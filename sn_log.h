@@ -19,6 +19,7 @@
 #include<pthread.h>
 #endif
 
+namespace sn{
 
 static std::mutex mtx_file_;
 static std::mutex mtx_console_;
@@ -54,7 +55,7 @@ void GetString(std::vector<std::string>& str_vec, T&& t, Args&&... args){
 
 //format string
 template<typename T = std::string, typename... Args>
-std::string sn_format(std::string fmt, Args&&... args){
+std::string format(std::string fmt, Args&&... args){
     size_t args_index = 0;
 
     std::vector<std::string> str_vec;
@@ -193,7 +194,7 @@ static std::string ConsoleColor(LogLevel level_){
 //程序开始时间
 static std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
 
-static void sn_log(std::string message_, LogLevel level_, LogMode mode_){
+static void log(std::string message_, LogLevel level_, LogMode mode_){
     //毫秒计时
     std::chrono::steady_clock::time_point end_time_ = std::chrono::steady_clock::now();
     std::chrono::duration<double, std::milli> run_time_ms_ = end_time_ - start_time_;
@@ -245,97 +246,97 @@ static void sn_log(std::string message_, LogLevel level_, LogMode mode_){
 
 //console log function
 template<typename T = std::string, typename... Args>
-void sn_consolelog_debug(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_DEBUG, SN_CONSOLE);
+void consolelog_debug(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_DEBUG, SN_CONSOLE);
 }
 template<typename T = std::string>
-void sn_consolelog_debug(std::string message_){
-    sn_log(message_, SN_DEBUG, SN_CONSOLE);
+void consolelog_debug(std::string message_){
+    log(message_, SN_DEBUG, SN_CONSOLE);
 }
 
 template<typename T = std::string, typename... Args>
-void sn_consolelog_info(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_INFO, SN_CONSOLE);
+void consolelog_info(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_INFO, SN_CONSOLE);
 }
 template<typename T = std::string>
-void sn_consolelog_info(std::string message_){
-    sn_log(message_, SN_INFO, SN_CONSOLE);
+void consolelog_info(std::string message_){
+    log(message_, SN_INFO, SN_CONSOLE);
 }
 
 template<typename T = std::string, typename... Args>
-void sn_consolelog_warning(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_WARNING, SN_CONSOLE);
+void consolelog_warning(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_WARNING, SN_CONSOLE);
 
 }
 template<typename T = std::string>
-void sn_consolelog_warning(std::string message_){
-    sn_log(message_, SN_WARNING, SN_CONSOLE);
-}
-
-template<typename T = std::string, typename... Args>
-void sn_consolelog_error(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_ERROR, SN_CONSOLE);
-}
-template<typename T = std::string>
-void sn_consolelog_error(std::string message_){
-    sn_log(message_, SN_ERROR, SN_CONSOLE);
+void consolelog_warning(std::string message_){
+    log(message_, SN_WARNING, SN_CONSOLE);
 }
 
 template<typename T = std::string, typename... Args>
-void sn_consolelog_fatal(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_FATAL, SN_CONSOLE);
+void consolelog_error(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_ERROR, SN_CONSOLE);
 }
 template<typename T = std::string>
-void sn_consolelog_fatal(std::string message_){
-    sn_log(message_, SN_FATAL, SN_CONSOLE);
+void consolelog_error(std::string message_){
+    log(message_, SN_ERROR, SN_CONSOLE);
+}
+
+template<typename T = std::string, typename... Args>
+void consolelog_fatal(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_FATAL, SN_CONSOLE);
+}
+template<typename T = std::string>
+void consolelog_fatal(std::string message_){
+    log(message_, SN_FATAL, SN_CONSOLE);
 }
 
 
 //file log function
 template<typename T = std::string, typename... Args>
-void sn_filelog_debug(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_DEBUG, SN_FILE);
+void filelog_debug(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_DEBUG, SN_FILE);
 }
 template<typename T = std::string>
-void sn_filelog_debug(std::string message_){
-    sn_log(message_, SN_DEBUG, SN_FILE);
+void filelog_debug(std::string message_){
+    log(message_, SN_DEBUG, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void sn_filelog_info(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_INFO, SN_FILE);
+void filelog_info(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_INFO, SN_FILE);
 }
 
 template<typename T = std::string>
-void sn_filelog_info(std::string message_){
-    sn_log(message_, SN_INFO, SN_FILE);
+void filelog_info(std::string message_){
+    log(message_, SN_INFO, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void sn_filelog_warning(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_WARNING, SN_FILE);
+void filelog_warning(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_WARNING, SN_FILE);
 }
 template<typename T = std::string>
-void sn_filelog_warning(std::string message_){
-    sn_log(message_, SN_WARNING, SN_FILE);
+void filelog_warning(std::string message_){
+    log(message_, SN_WARNING, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void sn_filelog_error(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_ERROR, SN_FILE);
+void filelog_error(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_ERROR, SN_FILE);
 }
 template<typename T = std::string>
-void sn_filelog_error(std::string message_){
-    sn_log(message_, SN_ERROR, SN_FILE);
+void filelog_error(std::string message_){
+    log(message_, SN_ERROR, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void sn_filelog_fatal(std::string message_, Args&&... args_){
-    sn_log(sn_format(message_, args_...), SN_FATAL, SN_FILE);
+void filelog_fatal(std::string message_, Args&&... args_){
+    log(format(message_, args_...), SN_FATAL, SN_FILE);
 }
 template<typename T = std::string>
-void sn_filelog_fatal(std::string message_){
-    sn_log(message_, SN_FATAL, SN_FILE);
+void filelog_fatal(std::string message_){
+    log(message_, SN_FATAL, SN_FILE);
 }
 
 
@@ -348,7 +349,7 @@ void sn_filelog_fatal(std::string message_){
 
 
 
-
+}
 
 
 
