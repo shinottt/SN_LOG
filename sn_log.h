@@ -1,3 +1,7 @@
+/*
+*   Simple header-only logging library for C++17.
+*
+*/
 #ifndef _SN_LOG_HEADER_
 #define _SN_LOG_HEADER_
 
@@ -7,10 +11,10 @@
 #include<string>
 #include<mutex>
 #include<chrono>
+#include<ctime>
 #include<iomanip>           //put_time
 #include<vector>
 #include<sstream>
-
 
 #ifdef WIN32
 #include<Windows.h>
@@ -20,23 +24,6 @@
 #endif
 
 namespace sn{
-
-static std::mutex mtx_file_;
-static std::mutex mtx_console_;
-
-// command line text color
-const std::string cmd_color_reset ="\033[0m";
-const std::string cmd_color_cyan = "\033[36m";
-const std::string cmd_color_white= "\033[37m";
-const std::string cmd_color_yellow = "\033[33m";
-const std::string cmd_color_red ="\033[31m";
-const std::string cmd_color_purple = "\033[35m";
-
-// define log file name
-static std::fstream file_;
-static bool log_file_init_ = false;
-const std::string LOG_FILE_PATH = "sn_log.txt";
-
 
 template<typename T>
 void GetString(std::vector<std::string>& str_vec, T&& t){
@@ -80,7 +67,23 @@ std::string format(std::string fmt, Args&&... args){
     return oss.str();
 } 
 
+namespace log{
 
+static std::mutex mtx_file_;
+static std::mutex mtx_console_;
+
+// command line text color
+const std::string cmd_color_reset ="\033[0m";
+const std::string cmd_color_cyan = "\033[36m";
+const std::string cmd_color_white= "\033[37m";
+const std::string cmd_color_yellow = "\033[33m";
+const std::string cmd_color_red ="\033[31m";
+const std::string cmd_color_purple = "\033[35m";
+
+// define log file name
+static std::fstream file_;
+static bool log_file_init_ = false;
+const std::string LOG_FILE_PATH = "sn_log.txt";
 
 enum LogLevel{
     SN_NONE,
@@ -191,19 +194,17 @@ static std::string ConsoleColor(LogLevel level_){
 }
 
 
-//程序开始时间
-static std::chrono::steady_clock::time_point start_time_ = std::chrono::steady_clock::now();
-
 static void log(std::string message_, LogLevel level_, LogMode mode_){
-    //毫秒计时
-    std::chrono::steady_clock::time_point end_time_ = std::chrono::steady_clock::now();
-    std::chrono::duration<double, std::milli> run_time_ms_ = end_time_ - start_time_;
+    //系统时间
+    const std::chrono::time_point<std::chrono::system_clock> now_ = std::chrono::system_clock::now();
+    const std::time_t now_t_ = std::chrono::system_clock::to_time_t(now_);
+
     switch (mode_)
     {
     case SN_CONSOLE:
         mtx_console_.lock();
         //使用ANSI转义序列实现文本彩色输出
-        std::cout<<ConsoleColor(level_)<<"[ "<<log_level_to_string(level_)<<" ]    "<<message_<<"    [ "<<run_time_ms_.count()<<" ms ]"<<ConsoleColor(SN_NONE)<<std::endl;
+        std::cout<<ConsoleColor(level_)<<"[ "<<log_level_to_string(level_)<<" ]    "<<message_<<"    [ "<<std::put_time(std::localtime(&now_t_), "%Y-%m-%d %H:%M:%S")<<" ]"<<ConsoleColor(SN_NONE)<<std::endl;
         mtx_console_.unlock();
         break;
     case SN_FILE:
@@ -228,7 +229,7 @@ static void log(std::string message_, LogLevel level_, LogMode mode_){
         //写入日志
         file_.open(LOG_FILE_PATH.c_str(), std::ios::out | std::ios::app);
         if(file_.is_open()){
-            file_<<"[ "<<log_level_to_string(level_)<<" ]    "<<message_<<"    [ "<<run_time_ms_.count()<<" ms ]"<<std::endl;
+            file_<<"[ "<<log_level_to_string(level_)<<" ]    "<<message_<<"    [ "<<std::put_time(localtime(&now_t_), "%Y-%m-%d %H:%M:%S")<<" ]"<<std::endl;
             file_.close();
         }
         else{
@@ -246,111 +247,99 @@ static void log(std::string message_, LogLevel level_, LogMode mode_){
 
 //console log function
 template<typename T = std::string, typename... Args>
-void consolelog_debug(std::string message_, Args&&... args_){
+void console_debug(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_DEBUG, SN_CONSOLE);
 }
 template<typename T = std::string>
-void consolelog_debug(std::string message_){
+void console_debug(std::string message_){
     log(message_, SN_DEBUG, SN_CONSOLE);
 }
 
 template<typename T = std::string, typename... Args>
-void consolelog_info(std::string message_, Args&&... args_){
+void console_info(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_INFO, SN_CONSOLE);
 }
 template<typename T = std::string>
-void consolelog_info(std::string message_){
+void console_info(std::string message_){
     log(message_, SN_INFO, SN_CONSOLE);
 }
 
 template<typename T = std::string, typename... Args>
-void consolelog_warning(std::string message_, Args&&... args_){
+void console_warning(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_WARNING, SN_CONSOLE);
 
 }
 template<typename T = std::string>
-void consolelog_warning(std::string message_){
+void console_warning(std::string message_){
     log(message_, SN_WARNING, SN_CONSOLE);
 }
 
 template<typename T = std::string, typename... Args>
-void consolelog_error(std::string message_, Args&&... args_){
+void console_error(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_ERROR, SN_CONSOLE);
 }
 template<typename T = std::string>
-void consolelog_error(std::string message_){
+void console_error(std::string message_){
     log(message_, SN_ERROR, SN_CONSOLE);
 }
 
 template<typename T = std::string, typename... Args>
-void consolelog_fatal(std::string message_, Args&&... args_){
+void console_fatal(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_FATAL, SN_CONSOLE);
 }
 template<typename T = std::string>
-void consolelog_fatal(std::string message_){
+void console_fatal(std::string message_){
     log(message_, SN_FATAL, SN_CONSOLE);
 }
 
 
 //file log function
 template<typename T = std::string, typename... Args>
-void filelog_debug(std::string message_, Args&&... args_){
+void file_debug(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_DEBUG, SN_FILE);
 }
 template<typename T = std::string>
-void filelog_debug(std::string message_){
+void file_debug(std::string message_){
     log(message_, SN_DEBUG, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void filelog_info(std::string message_, Args&&... args_){
+void file_info(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_INFO, SN_FILE);
 }
 
 template<typename T = std::string>
-void filelog_info(std::string message_){
+void file_info(std::string message_){
     log(message_, SN_INFO, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void filelog_warning(std::string message_, Args&&... args_){
+void file_warning(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_WARNING, SN_FILE);
 }
 template<typename T = std::string>
-void filelog_warning(std::string message_){
+void file_warning(std::string message_){
     log(message_, SN_WARNING, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void filelog_error(std::string message_, Args&&... args_){
+void file_error(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_ERROR, SN_FILE);
 }
 template<typename T = std::string>
-void filelog_error(std::string message_){
+void file_error(std::string message_){
     log(message_, SN_ERROR, SN_FILE);
 }
 
 template<typename T = std::string, typename... Args>
-void filelog_fatal(std::string message_, Args&&... args_){
+void file_fatal(std::string message_, Args&&... args_){
     log(format(message_, args_...), SN_FATAL, SN_FILE);
 }
 template<typename T = std::string>
-void filelog_fatal(std::string message_){
+void file_fatal(std::string message_){
     log(message_, SN_FATAL, SN_FILE);
 }
 
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-#endif  // _SN_LOG_HEADER11_
+}   // namespace log
+}   // namespace sn
+#endif  // _SN_LOG_HEADER_
