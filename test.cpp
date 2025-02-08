@@ -1,8 +1,9 @@
 #include"sn_log.h"
 
+
 int main(){
 
-    int log_num = 1000;
+    int log_num = 10000;
 
     for(int i = 0; i < log_num; ++i){
         sn::log::console_debug("Debug message: {} {}", i+1, "debug");

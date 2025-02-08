@@ -69,8 +69,8 @@ std::string format(std::string fmt, Args&&... args){
 
 namespace log{
 
-static std::mutex mtx_file_;
-static std::mutex mtx_console_;
+inline std::mutex mtx_file_;
+inline std::mutex mtx_console_;
 
 // command line text color
 const std::string cmd_color_reset ="\033[0m";
@@ -81,8 +81,8 @@ const std::string cmd_color_red ="\033[31m";
 const std::string cmd_color_purple = "\033[35m";
 
 // define log file name
-static std::fstream file_;
-static bool log_file_init_ = false;
+inline std::fstream file_;
+inline bool log_file_init_ = false;
 const std::string LOG_FILE_PATH = "sn_log.txt";
 
 enum LogLevel{
@@ -107,7 +107,7 @@ windows下使用函数控制终端输出颜色，示例：
 */
 /*
 #ifdef WIN32
-static void ConsoleColor_win(LogLevel level_){
+inline void ConsoleColor_win(LogLevel level_){
         HANDLE hConsole_ = GetStdHandle(STD_OUTPUT_HANDLE);
         switch (level_){
             case SN_DEBUG:
@@ -138,7 +138,7 @@ static void ConsoleColor_win(LogLevel level_){
 
 
 
-static std::string log_level_to_string(LogLevel level_){
+inline std::string log_level_to_string(LogLevel level_){
     std::string level_str_;
     switch(level_){
         case SN_DEBUG:
@@ -167,7 +167,7 @@ static std::string log_level_to_string(LogLevel level_){
 }
 
 
-static std::string ConsoleColor(LogLevel level_){
+inline std::string ConsoleColor(LogLevel level_){
     switch(level_){
         case SN_DEBUG:
             return cmd_color_cyan;
@@ -194,7 +194,7 @@ static std::string ConsoleColor(LogLevel level_){
 }
 
 
-static void log(std::string message_, LogLevel level_, LogMode mode_){
+inline void log(std::string message_, LogLevel level_, LogMode mode_){
     //系统时间
     const std::chrono::time_point<std::chrono::system_clock> now_ = std::chrono::system_clock::now();
     const std::time_t now_t_ = std::chrono::system_clock::to_time_t(now_);

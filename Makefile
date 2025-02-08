@@ -1,2 +1,2 @@
 test.exe:test.cpp
-	g++ test.cpp -o test.exe -W -Og -std=c++17
+	g++ test.cpp -o test.exe -Wall -Og -std=c++17
